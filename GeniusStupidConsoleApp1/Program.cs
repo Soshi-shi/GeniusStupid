@@ -8,6 +8,10 @@
 
 Console.WriteLine("Ответами на все вопросы являются числа, вводите данные правильно!");
 Console.Write("Введите свое имя: ");
+List<string> usersTestsHistory = new List<string>()
+{
+    "Имя пользоваетля----Количество баллов----Диагноз"
+};
 string userName = Console.ReadLine();
 string[] questions = new string[]
     {
@@ -21,7 +25,6 @@ string[] questions = new string[]
         "Я — двузначное число. Сумма моих цифр равна 9. Если поменять цифры местами, число увеличится на 27. Какое я число?",
         "Во дворе гуляют куры и кролики. Всего у них 10 голов и 28 ног. Сколько во дворе кроликов?",
         "В ящике лежат носки трёх цветов: красные, синие и чёрные. Сколько носков нужно достать в темноте, чтобы гарантированно получить пару одного цвета?"
-
     };
 string[] answers = new string[]
     {
@@ -35,10 +38,10 @@ string[] answers = new string[]
         "36",
         "4",
         "4"
-
     };
 while (true)
 {
+    string diagnos;
     int correctAnswersCounter = 0;
     MixArray(questions, answers);
 
@@ -50,14 +53,23 @@ while (true)
         correctAnswersCounter = CheckingTheUserAnswers(answer, correctAnswer, correctAnswersCounter);
     }
     double correctAnswersPircent = correctAnswersCounter * 100 / answers.Length;
-    Diagnosis(correctAnswersPircent, userName);
-    Console.Write("Хотите сыграть снова? 'Да'/'Нет': ");
+    PrintDiagnos(correctAnswersPircent, userName);
+    diagnos = Diagnosis(correctAnswersPircent, userName);
+    Console.Write("Хотите сыграть снова? 'Да'/'Нет': "); 
+    string userTestResult = $"{userName}: {correctAnswersCounter} баллов - {diagnos}";
+    usersTestsHistory.Add(userTestResult);
     string choice = Console.ReadLine();
     if (choice == "Нет")
     {
         break;
     }
 }
+
+for (int i = 0; i < usersTestsHistory.Count; i++)
+{
+    Console.WriteLine(usersTestsHistory[i]);
+}
+
 
 static string GetUserAnswer()
 {
@@ -91,7 +103,7 @@ static int CheckingTheUserAnswers(string answer, string correctAnswer, int corre
     return correctAnswersCounter;
 }
 
-static void Diagnosis(double correctAnswersPircent, string userName)
+static void PrintDiagnos(double correctAnswersPircent, string userName)
 {
     Console.Write($"{userName} вы ");
     if (correctAnswersPircent < 20)
@@ -129,6 +141,34 @@ static void Diagnosis(double correctAnswersPircent, string userName)
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine("ГЕНИЙ!");
         Console.ResetColor();
+    }
+}
+
+static string Diagnosis(double correctAnswersPircent, string userName)
+{
+    if (correctAnswersPircent < 20)
+    {
+        return "ИДИОТ!";
+    }
+    else if (correctAnswersPircent < 40)
+    {
+        return "КРИТИН!";
+    }
+    else if (correctAnswersPircent < 60)
+    {
+        return "ДУРАК!";
+    }
+    else if (correctAnswersPircent < 80)
+    {
+        return "НОРМАЛЬНЫЙ!";
+    }
+    else if (correctAnswersPircent < 100)
+    {
+        return "ТАЛАНТ!";
+    }
+    else
+    {
+        return "ГЕНИЙ!";
     }
 }
 
