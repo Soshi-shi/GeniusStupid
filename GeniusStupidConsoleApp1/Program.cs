@@ -5,14 +5,17 @@
 // 5. получаем ответ пользователя
 // 6. Если правильно то счетчик ++
 // 7. Выводим счетчик
+using System.Text;
 
 Console.WriteLine("Ответами на все вопросы являются числа, вводите данные правильно!");
 Console.Write("Введите свое имя: ");
-List<string> usersTestsHistory = new List<string>()
-{
-    "Имя пользоваетля----Количество баллов----Диагноз"
-};
 string userName = Console.ReadLine();
+
+string filePath = Path.Combine(
+    Environment.CurrentDirectory,
+    "result.tsv"
+);
+
 string[] questions = new string[]
     {
         "Сколько будет 2 плюс 2, умноженное на 2?",
@@ -39,9 +42,10 @@ string[] answers = new string[]
         "4",
         "4"
     };
+
 while (true)
 {
-    string diagnos;
+    string diagnosis;
     int correctAnswersCounter = 0;
     MixArray(questions, answers);
 
@@ -53,11 +57,10 @@ while (true)
         correctAnswersCounter = CheckingTheUserAnswers(answer, correctAnswer, correctAnswersCounter);
     }
     double correctAnswersPircent = correctAnswersCounter * 100 / answers.Length;
-    PrintDiagnos(correctAnswersPircent, userName);
-    diagnos = Diagnosis(correctAnswersPircent, userName);
+    PrintDiagnosis(correctAnswersPircent, userName);
+    diagnosis = Diagnosis(correctAnswersPircent, userName);
+    SaveResult(userName, correctAnswersCounter, diagnosis);
     Console.Write("Хотите сыграть снова? 'Да'/'Нет': "); 
-    string userTestResult = $"{userName}: {correctAnswersCounter} баллов - {diagnos}";
-    usersTestsHistory.Add(userTestResult);
     string choice = Console.ReadLine();
     if (choice == "Нет")
     {
@@ -65,9 +68,11 @@ while (true)
     }
 }
 
-for (int i = 0; i < usersTestsHistory.Count; i++)
+Console.Write("Хотите просмотреть таблицу результатов? 'Да'/ 'Нет': ");
+string chois = Console.ReadLine();
+if (chois == "Да")
 {
-    Console.WriteLine(usersTestsHistory[i]);
+    VievResults(filePath);
 }
 
 
@@ -103,7 +108,7 @@ static int CheckingTheUserAnswers(string answer, string correctAnswer, int corre
     return correctAnswersCounter;
 }
 
-static void PrintDiagnos(double correctAnswersPircent, string userName)
+static void PrintDiagnosis(double correctAnswersPircent, string userName)
 {
     Console.Write($"{userName} вы ");
     if (correctAnswersPircent < 20)
@@ -180,4 +185,61 @@ static void MixArray(string[] questions, string[] answers)
         (questions[i], questions[j]) = (questions[j], questions[i]);
         (answers[i], answers[j]) = (answers[j], answers[i]);
     }
+}
+
+static void SaveResult (string userName, int points, string diagnosis)
+{
+    string filePath = Path.Combine(Environment.CurrentDirectory, "result.tsv");
+
+    if (!File.Exists(filePath))
+    {
+        File.WriteAllText(filePath, 
+        "Имя\tКоличество балов\tДиагноз\n", 
+        Encoding.UTF8);
+
+    }
+
+    string result = $"{userName}\t{points}\t{diagnosis}\n";
+    File.AppendAllText(filePath, result, Encoding.UTF8);
+}
+
+static void VievResults(string filePath)
+{
+    if (!File.Exists(filePath))
+    {
+        Console.WriteLine("\nИстория результатов пока что пуста");
+        return;
+    }
+    string[] lines = File.ReadAllLines(filePath, Encoding.UTF8);
+    if (lines.Length <= 1)
+    {
+        Console.WriteLine("\nИстория результатов пока пуста.");
+        return;
+    }
+
+    Console.WriteLine("========== ИСТОРИЯ РЕЗУЛЬТАТОВ ==========");
+    Console.WriteLine(
+        "{0,-20} | {1,-20} | {2}",
+        "Имя",
+        "Баллы",
+        "Диагноз"
+    );
+
+    Console.WriteLine(new string('-', 65));
+
+    for (int i = 1; i < lines.Length; i++)
+    {
+        string[] data = lines[i].Split('\t');
+
+        if (data.Length >= 3)
+        {
+            Console.WriteLine(
+                "{0,-20} | {1,-20} | {2}",
+                data[0],
+                data[1],
+                data[2]
+            );
+        }
+    }
+    Console.WriteLine(new string('-', 65));
 }
